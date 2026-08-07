@@ -58,7 +58,7 @@ The core exposes functions equivalent to `validateRequest`, `evaluateRequest`, `
 ## Workflow
 
 ```text
-Synthetic fixture or form input
+Synthetic fixture
   -> schema validation
   -> deterministic policy evaluation
   -> explained recommendation
@@ -79,7 +79,7 @@ The single-page application contains:
 - A policy-results section that explains why the recommendation was produced.
 - Review actions: **Approve**, **Request context**, and **Reject**.
 - A chronological audit timeline showing creation, evaluation, and human-review events.
-- Empty, validation-error, unavailable-action, and reset states.
+- Empty, unavailable-action, local-persistence, and reset states.
 
 The product does not imitate a chatbot or imply autonomous decision-making. The interface states that recommendations are deterministic and that a human remains responsible for review.
 
@@ -93,11 +93,11 @@ The product does not imitate a chatbot or imply autonomous decision-making. The 
 
 ## Error Handling
 
-- Invalid input is rejected before policy evaluation and surfaced with field-level accessible messages.
-- Unknown policy configuration is treated as a safe error, never as an automatic approval.
+- Invalid input is rejected before policy evaluation and returned as field-level errors by the core. The v0.1 demo uses reviewed fixtures rather than a free-text intake form.
+- Policies are fixed, code-owned definitions in v0.1; the public core accepts no runtime policy configuration that could become an automatic approval.
 - Invalid review transitions return a typed error and leave the existing snapshot unchanged.
 - Failed local persistence leaves the current in-memory session usable and shows a non-blocking explanation.
-- Reset is explicit and confirmable; it never deletes data outside the demo's own local-storage key.
+- Reset is explicit; it never deletes data outside the demo's own local-storage key.
 
 ## Quality and Release Requirements
 
