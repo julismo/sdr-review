@@ -1,0 +1,16 @@
+{
+  "name": "@reviewable-intake/demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@reviewable-intake/core": "file:../../packages/core",
+    "@reviewable-intake/fixtures": "file:../../packages/fixtures",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  }
+}

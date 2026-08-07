@@ -1,0 +1,9 @@
+{
+  "name": "@reviewable-intake/fixtures",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@reviewable-intake/core": "file:../core"
+  }
+}
