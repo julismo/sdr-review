@@ -37,3 +37,54 @@ export type ValidationResult =
       readonly ok: false;
       readonly errors: readonly ValidationError[];
     };
+
+export type PolicyOutcome = "allow" | "review" | "block";
+
+export interface PolicyResult {
+  readonly policyId: string;
+  readonly outcome: PolicyOutcome;
+  readonly explanation: string;
+}
+
+export interface Evaluation {
+  readonly recommendation: PolicyOutcome;
+  readonly results: readonly PolicyResult[];
+}
+
+export type ReviewStatus =
+  | "new"
+  | "evaluated"
+  | "needs_review"
+  | "approved"
+  | "context_requested"
+  | "rejected";
+
+export type ReviewAction = "approve" | "request_context" | "reject";
+
+export type AuditActor = "system" | "reviewer";
+
+export type AuditEventType =
+  | "request_created"
+  | "request_evaluated"
+  | "request_approved"
+  | "context_requested"
+  | "request_rejected";
+
+export interface AuditEvent {
+  readonly id: string;
+  readonly occurredAt: string;
+  readonly actor: AuditActor;
+  readonly type: AuditEventType;
+  readonly summary: string;
+}
+
+export interface WorkflowRecord {
+  readonly request: IntakeRequest;
+  readonly status: ReviewStatus;
+  readonly evaluation?: Evaluation;
+  readonly events: readonly AuditEvent[];
+}
+
+export type TransitionResult =
+  | { readonly ok: true; readonly value: WorkflowRecord }
+  | { readonly ok: false; readonly error: string; readonly value: WorkflowRecord };
