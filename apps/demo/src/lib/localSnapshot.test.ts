@@ -13,6 +13,16 @@ describe("localSnapshot", () => {
     expect(loadSnapshot(storage)).toBeNull();
   });
 
+  it("returns null for structurally invalid persisted records", () => {
+    const storage = {
+      getItem: () => '{"selectedId":"req-aurora","records":[42]}',
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+
+    expect(loadSnapshot(storage)).toBeNull();
+  });
+
   it("reports a persistence failure while keeping the caller in control", () => {
     const storage = {
       getItem: () => null,
