@@ -40,4 +40,16 @@ describe("localSnapshot", () => {
 
     expect(removed).toEqual([storageKey]);
   });
+
+  it("keeps the caller in control when clearing persistence fails", () => {
+    const storage = {
+      getItem: () => null,
+      setItem: () => undefined,
+      removeItem: () => {
+        throw new Error("storage unavailable");
+      },
+    };
+
+    expect(() => clearSnapshot(storage)).not.toThrow();
+  });
 });

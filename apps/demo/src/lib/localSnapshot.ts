@@ -62,5 +62,9 @@ export function saveSnapshot(
 }
 
 export function clearSnapshot(storage: StorageLike): void {
-  storage.removeItem(snapshotKey);
+  try {
+    storage.removeItem(snapshotKey);
+  } catch {
+    // A failed local clear must not interrupt the active session.
+  }
 }
