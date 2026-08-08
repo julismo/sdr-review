@@ -10,6 +10,25 @@ describe("createDemoRecords", () => {
     expect(createDemoRecords()).toHaveLength(6);
   });
 
+  it("validates every authored fixture through the real public boundary", () => {
+    const validateRequest = core.validateRequest;
+    const validateRequestSpy = vi.spyOn(core, "validateRequest");
+
+    const records = createDemoRecords();
+
+    expect(validateRequestSpy).toHaveBeenCalledTimes(6);
+    expect(
+      validateRequestSpy.mock.calls.map(([candidate]) =>
+        validateRequest(candidate),
+      ),
+    ).toEqual(
+      records.map(({ request }) => ({
+        ok: true,
+        value: request,
+      })),
+    );
+  });
+
   it("fails deterministically when an authored fixture is invalid", () => {
     vi.spyOn(core, "validateRequest").mockReturnValueOnce({
       ok: false,
