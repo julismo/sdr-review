@@ -31,4 +31,29 @@ describe("App", () => {
     ).toBeEnabled();
     expect(screen.getByRole("button", { name: "Reject" })).toBeEnabled();
   });
+
+  it("adds a human audit event and disables further actions after approval", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Approve" }));
+
+    expect(
+      screen.getByText("Human reviewer approved the request."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve" })).toBeDisabled();
+  });
+
+  it("restores the original workflow after reset", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Approve" }));
+    await user.click(screen.getByRole("button", { name: "Reset demo data" }));
+
+    expect(screen.getByRole("button", { name: "Approve" })).toBeEnabled();
+    expect(
+      screen.queryByText("Human reviewer approved the request."),
+    ).not.toBeInTheDocument();
+  });
 });
