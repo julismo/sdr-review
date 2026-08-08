@@ -3,6 +3,7 @@ import { createDemoRecords } from "@reviewable-intake/fixtures";
 import {
   clearSnapshot,
   loadSnapshot,
+  loadSnapshotOutcome,
   saveSnapshot,
   type StorageLike,
 } from "./localSnapshot";
@@ -35,6 +36,52 @@ function approvedRecord(record: WorkflowRecord): WorkflowRecord {
 }
 
 describe("localSnapshot", () => {
+  it("distinguishes an absent snapshot from a failed read", () => {
+    const emptyStorage = {
+      getItem: () => null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+    const unreadableStorage = {
+      getItem: () => {
+        throw new DOMException("Storage read denied", "SecurityError");
+      },
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+
+    expect(loadSnapshotOutcome(emptyStorage)).toEqual({ status: "empty" });
+    expect(loadSnapshotOutcome(unreadableStorage)).toEqual({
+      status: "error",
+      error:
+        "Saved workflow data could not be read safely. Fresh fixtures are active for this session.",
+    });
+    expect(loadSnapshot(unreadableStorage)).toBeNull();
+  });
+
+  it("reports corrupt or semantically invalid saved data without exposing it", () => {
+    const corruptStorage = {
+      getItem: () => "{not-json",
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+    const invalidStorage = storageWithSnapshot(
+      createDemoRecords(),
+      "untrusted-selection",
+    );
+
+    expect(loadSnapshotOutcome(corruptStorage)).toEqual({
+      status: "error",
+      error:
+        "Saved workflow data could not be read safely. Fresh fixtures are active for this session.",
+    });
+    expect(loadSnapshotOutcome(invalidStorage)).toEqual({
+      status: "error",
+      error:
+        "Saved workflow data could not be read safely. Fresh fixtures are active for this session.",
+    });
+  });
+
   it("returns null for corrupt local data instead of throwing", () => {
     const storage = {
       getItem: () => "{not-json",

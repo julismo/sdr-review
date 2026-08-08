@@ -7,7 +7,7 @@ import {
 import { createDemoRecords } from "@reviewable-intake/fixtures";
 import {
   clearSnapshot,
-  loadSnapshot,
+  loadSnapshotOutcome,
   saveSnapshot,
   type DemoSnapshot,
   type StorageLike,
@@ -18,15 +18,24 @@ interface InitialState {
   readonly persistenceMessage: string | null;
 }
 
-function browserStorage(): StorageLike | null {
+type BrowserStorageOutcome =
+  | { readonly status: "available"; readonly storage: StorageLike }
+  | { readonly status: "server" }
+  | { readonly status: "error"; readonly error: string };
+
+function browserStorage(): BrowserStorageOutcome {
   if (typeof window === "undefined") {
-    return null;
+    return { status: "server" };
   }
 
   try {
-    return window.localStorage;
+    return { status: "available", storage: window.localStorage };
   } catch {
-    return null;
+    return {
+      status: "error",
+      error:
+        "Local persistence is unavailable. Fresh fixtures are active for this session.",
+    };
   }
 }
 
@@ -47,19 +56,37 @@ function selectedRecordFor(snapshot: DemoSnapshot): WorkflowRecord | null {
   );
 }
 
-function initialState(storage: StorageLike | null): InitialState {
-  const persisted = storage ? loadSnapshot(storage) : null;
+function initialState(storageOutcome: BrowserStorageOutcome): InitialState {
+  if (storageOutcome.status === "error") {
+    return {
+      snapshot: freshSnapshot(),
+      persistenceMessage: storageOutcome.error,
+    };
+  }
 
-  if (persisted) {
-    return { snapshot: persisted, persistenceMessage: null };
+  if (storageOutcome.status === "available") {
+    const loadOutcome = loadSnapshotOutcome(storageOutcome.storage);
+
+    if (loadOutcome.status === "loaded") {
+      return { snapshot: loadOutcome.snapshot, persistenceMessage: null };
+    }
+
+    if (loadOutcome.status === "error") {
+      return {
+        snapshot: freshSnapshot(),
+        persistenceMessage: loadOutcome.error,
+      };
+    }
   }
 
   return { snapshot: freshSnapshot(), persistenceMessage: null };
 }
 
 export function useDemoWorkflow() {
-  const storage = useMemo(() => browserStorage(), []);
-  const [initial] = useState(() => initialState(storage));
+  const storageOutcome = useMemo(() => browserStorage(), []);
+  const storage =
+    storageOutcome.status === "available" ? storageOutcome.storage : null;
+  const [initial] = useState(() => initialState(storageOutcome));
   const [snapshot, setSnapshot] = useState(initial.snapshot);
   const snapshotRef = useRef(snapshot);
   const [persistenceMessage, setPersistenceMessage] = useState(
@@ -126,7 +153,6 @@ export function useDemoWorkflow() {
     setSnapshot(nextSnapshot);
 
     if (!storage) {
-      setPersistenceMessage(null);
       return;
     }
 

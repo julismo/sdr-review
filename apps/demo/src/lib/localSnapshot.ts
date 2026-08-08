@@ -27,6 +27,14 @@ export type PersistenceResult =
   | { readonly ok: true }
   | { readonly ok: false; readonly error: string };
 
+export type SnapshotLoadOutcome =
+  | { readonly status: "loaded"; readonly snapshot: DemoSnapshot }
+  | { readonly status: "empty" }
+  | { readonly status: "error"; readonly error: string };
+
+const snapshotReadError =
+  "Saved workflow data could not be read safely. Fresh fixtures are active for this session.";
+
 function isRecord(candidate: unknown): candidate is Record<string, unknown> {
   return candidate !== null && typeof candidate === "object" && !Array.isArray(candidate);
 }
@@ -328,18 +336,27 @@ function restoreCanonicalSnapshot(candidate: DemoSnapshot): DemoSnapshot | null 
   });
 }
 
-export function loadSnapshot(storage: StorageLike): DemoSnapshot | null {
+export function loadSnapshotOutcome(storage: StorageLike): SnapshotLoadOutcome {
   try {
     const raw = storage.getItem(snapshotKey);
-    if (!raw) {
-      return null;
+    if (raw === null) {
+      return { status: "empty" };
     }
 
     const parsed: unknown = JSON.parse(raw);
-    return isSnapshot(parsed) ? restoreCanonicalSnapshot(parsed) : null;
+    const snapshot = isSnapshot(parsed) ? restoreCanonicalSnapshot(parsed) : null;
+
+    return snapshot
+      ? { status: "loaded", snapshot }
+      : { status: "error", error: snapshotReadError };
   } catch {
-    return null;
+    return { status: "error", error: snapshotReadError };
   }
+}
+
+export function loadSnapshot(storage: StorageLike): DemoSnapshot | null {
+  const outcome = loadSnapshotOutcome(storage);
+  return outcome.status === "loaded" ? outcome.snapshot : null;
 }
 
 export function saveSnapshot(

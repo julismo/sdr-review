@@ -32,7 +32,7 @@ npm run scan:public-safety
 npm run verify:release-docs
 ```
 
-The public-safety scanner checks tracked text files in the working tree. Pass one Git revision after `--` to scan that reachable snapshot; CI applies the same command to every reachable revision.
+The public-safety scanner checks tracked text files in the working tree. Pass one Git revision after `--` to scan that reachable snapshot; CI applies the same command to every reachable revision. The scanner applies its strict credential, private-key, and email rules to `package-lock.json`, but exempts that generated dependency lockfile from external-URL and phone-like rules because registry URLs and version-like numeric metadata are expected there. This automated detection is not exhaustive. `npm ci` enforces manifest/lockfile consistency and uses recorded integrity metadata during installation, providing a separate dependency-review boundary.
 
 ## Boundaries
 

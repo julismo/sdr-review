@@ -55,7 +55,7 @@ function trackedFiles() {
 
   return git(args)
     .split("\0")
-    .filter((file) => file && file !== "package-lock.json")
+    .filter((file) => file)
     .sort((left, right) => left.localeCompare(right, "en"));
 }
 
@@ -132,23 +132,25 @@ function scan(file, text) {
     }
   }
 
-  for (const match of matches(phonePattern, text)) {
-    if (isPhoneCandidate(match[0])) {
-      findings.push({
-        category: "phone_number",
-        file,
-        line: lineNumber(text, match.index),
-      });
+  if (file !== "package-lock.json") {
+    for (const match of matches(phonePattern, text)) {
+      if (isPhoneCandidate(match[0])) {
+        findings.push({
+          category: "phone_number",
+          file,
+          line: lineNumber(text, match.index),
+        });
+      }
     }
-  }
 
-  for (const match of matches(urlPattern, text)) {
-    if (isExternalUrl(match[0])) {
-      findings.push({
-        category: "external_url",
-        file,
-        line: lineNumber(text, match.index),
-      });
+    for (const match of matches(urlPattern, text)) {
+      if (isExternalUrl(match[0])) {
+        findings.push({
+          category: "external_url",
+          file,
+          line: lineNumber(text, match.index),
+        });
+      }
     }
   }
 

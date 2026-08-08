@@ -172,3 +172,92 @@ test("detects supported candidates while keeping paths and values safe", async (
     await rm(repository, { recursive: true, force: true });
   }
 });
+
+test("scans lockfiles for strict findings while exempting registry and version metadata", async () => {
+  const repository = await mkdtemp(path.join(os.tmpdir(), "public-safety-"));
+
+  try {
+    assert.equal(run("git", ["init", "--quiet"], repository).status, 0);
+    assert.equal(
+      run("git", ["config", "user.name", "Safety Scanner Test"], repository)
+        .status,
+      0,
+    );
+    assert.equal(
+      run("git", ["config", "user.email", "scanner.invalid"], repository)
+        .status,
+      0,
+    );
+
+    const candidates = {
+      credential: "s" + "k-" + "L".repeat(24),
+      email: ["lock-owner", "example.invalid"].join("@"),
+      registry: [
+        "https",
+        "://",
+        "registry.npmjs.org",
+        "/dependency/-/dependency-1.0.0.tgz",
+      ].join(""),
+      version: ["1234", "5678"].join("-"),
+    };
+    const lockfileLines = [
+      "{",
+      '  "name": "scanner-lockfile-fixture",',
+      '  "lockfileVersion": 3,',
+      '  "packages": {',
+      '    "node_modules/dependency": {',
+      `      "version": ${JSON.stringify(candidates.version)},`,
+      `      "resolved": ${JSON.stringify(candidates.registry)},`,
+      '      "integrity": "sha512-test",',
+      `      "credential": ${JSON.stringify(candidates.credential)},`,
+      `      "email": ${JSON.stringify(candidates.email)}`,
+      "    }",
+      "  }",
+      "}",
+    ];
+    const credentialLine =
+      lockfileLines.findIndex((line) => line.includes('"credential"')) + 1;
+    const emailLine =
+      lockfileLines.findIndex((line) => line.includes('"email"')) + 1;
+
+    await writeFile(
+      path.join(repository, "package-lock.json"),
+      lockfileLines.join("\n") + "\n",
+    );
+    assert.equal(run("git", ["add", "."], repository).status, 0);
+    assert.equal(
+      run("git", ["commit", "--quiet", "-m", "lockfile fixture"], repository)
+        .status,
+      0,
+    );
+
+    const expected = [
+      `category=openai_api_key path="package-lock.json" line=${credentialLine}`,
+      `category=email_address path="package-lock.json" line=${emailLine}`,
+      "",
+    ].join("\n");
+    const currentUnsafe = run(process.execPath, [scannerPath], repository);
+    const revisionUnsafe = run(
+      process.execPath,
+      [scannerPath, "HEAD"],
+      repository,
+    );
+
+    for (const result of [currentUnsafe, revisionUnsafe]) {
+      assert.equal(result.status, 1);
+      assert.equal(result.stdout, expected);
+      assert.equal(result.stderr, "");
+      assert.equal(result.stdout.includes("external_url"), false);
+      assert.equal(result.stdout.includes("phone_number"), false);
+      assert.equal(
+        Object.values(candidates).some((candidate) =>
+          result.stdout.includes(candidate),
+        ),
+        false,
+        "scanner output must not contain matched lockfile values",
+      );
+    }
+  } finally {
+    await rm(repository, { recursive: true, force: true });
+  }
+});
