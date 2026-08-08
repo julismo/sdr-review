@@ -1,12 +1,12 @@
 # Reviewable Intake Workbench Design
 
-**Status:** Implemented and locally verified; public publication awaits final release checks
-**Repository language:** English  
-**License:** MIT
+- **Status:** Implemented and locally verified; public publication awaits final release checks
+- **Repository language:** English
+- **License:** MIT
 
 ## Purpose
 
-Reviewable Intake Workbench is a personal, open-source reference implementation for handling synthetic B2B demo requests. It demonstrates a small, usable policy engine and a review workflow that makes every decision visible and reversible by a human reviewer.
+Reviewable Intake Workbench is a personal, open-source reference implementation for handling synthetic B2B demo requests. It demonstrates a small, usable policy engine and a review workflow that makes each recommendation visible and leaves final review decisions to a human reviewer.
 
 The repository is a clean-room project with a new Git history. It must contain no non-public source code, business terminology, assets, contacts, identifiers, credentials, screenshots, or data.
 
