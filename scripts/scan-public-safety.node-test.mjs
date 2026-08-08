@@ -192,6 +192,7 @@ test("scans lockfiles for strict findings while exempting registry and version m
     const candidates = {
       credential: "s" + "k-" + "L".repeat(24),
       email: ["lock-owner", "example.invalid"].join("@"),
+      privateKey: ["-----BEGIN ", "PRIVATE ", "KEY-----"].join(""),
       registry: [
         "https",
         "://",
@@ -210,6 +211,7 @@ test("scans lockfiles for strict findings while exempting registry and version m
       `      "resolved": ${JSON.stringify(candidates.registry)},`,
       '      "integrity": "sha512-test",',
       `      "credential": ${JSON.stringify(candidates.credential)},`,
+      `      "privateKey": ${JSON.stringify(candidates.privateKey)},`,
       `      "email": ${JSON.stringify(candidates.email)}`,
       "    }",
       "  }",
@@ -219,6 +221,8 @@ test("scans lockfiles for strict findings while exempting registry and version m
       lockfileLines.findIndex((line) => line.includes('"credential"')) + 1;
     const emailLine =
       lockfileLines.findIndex((line) => line.includes('"email"')) + 1;
+    const privateKeyLine =
+      lockfileLines.findIndex((line) => line.includes('"privateKey"')) + 1;
 
     await writeFile(
       path.join(repository, "package-lock.json"),
@@ -233,6 +237,7 @@ test("scans lockfiles for strict findings while exempting registry and version m
 
     const expected = [
       `category=openai_api_key path="package-lock.json" line=${credentialLine}`,
+      `category=private_key path="package-lock.json" line=${privateKeyLine}`,
       `category=email_address path="package-lock.json" line=${emailLine}`,
       "",
     ].join("\n");
