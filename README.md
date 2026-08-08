@@ -38,4 +38,4 @@ The public-safety scanner checks tracked text files in the working tree. Pass on
 
 This is not a CRM, messaging service, AI agent, or production decision system. It contains no real data, credentials, external integrations, analytics, authentication, or database.
 
-Read [ARCHITECTURE.md](ARCHITECTURE.md), [PROVENANCE.md](PROVENANCE.md), [the data boundary](docs/data-boundary.md), and [SECURITY.md](SECURITY.md) before adapting it.
+Read [ARCHITECTURE.md](ARCHITECTURE.md), [PROVENANCE.md](PROVENANCE.md), [the data boundary](docs/data-boundary.md), and [SECURITY.md](SECURITY.md) before adapting it. Reuse is governed by the [LICENSE](LICENSE), contributions follow [CONTRIBUTING.md](CONTRIBUTING.md), and supported customization paths are described in the [extension guide](docs/extension-guide.md).

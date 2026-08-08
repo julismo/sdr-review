@@ -10,6 +10,6 @@ Open a private security advisory in the repository. Do not include real personal
 
 ## Release rule
 
-Before publication, scan the working tree and reachable Git history for credentials, contact identifiers, external URLs, generated assets, and unreviewed metadata.
+Before publication, run the automated safety scan over tracked text in the working tree and reachable Git history. Binary assets and their metadata require an explicit manual review until the project has a binary allowlist or a fail-closed binary check.
 
-Run `npm run scan:public-safety` for the tracked working tree or `npm run scan:public-safety -- <revision>` for one Git revision. The dependency-free scanner reports only category, path, and line. It checks strict credential shapes, email addresses, phone-like values, and non-loopback URLs; ISO dates and IPv4 addresses are classified separately, and only `127.0.0.1`, `localhost`, and `::1` are accepted URL hosts. This focused scan supports review but does not guarantee detection of every sensitive value.
+Run `npm run scan:public-safety` for the tracked working tree or `npm run scan:public-safety -- <revision>` for one Git revision. The dependency-free text scanner reports only category, path, and line. It checks strict credential shapes, email addresses, phone-like values, and non-loopback URLs; ISO dates and IPv4 addresses are classified separately, and only `127.0.0.1`, `localhost`, and `::1` are accepted URL hosts. These automated text and history checks support review but do not inspect binary contents or comprehensively validate file metadata, and they do not guarantee detection of every sensitive value.

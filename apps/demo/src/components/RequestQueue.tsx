@@ -26,7 +26,15 @@ export function RequestQueue({
               type="button"
             >
               <strong>{record.request.company}</strong>
-              <span>{record.status.replaceAll("_", " ")}</span>
+              <span className="queue-item-status">
+                Status: {record.status.replaceAll("_", " ")}
+              </span>
+              <span>
+                Recommendation: {record.evaluation?.recommendation ?? "No evaluation available."}
+              </span>
+              <span className="queue-item-scope">
+                Scope: {record.request.scope}
+              </span>
             </button>
           </li>
         ))}

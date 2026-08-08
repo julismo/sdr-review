@@ -26,8 +26,25 @@ const requiredWorkflowTokens = [
   "git rev-list --all",
 ];
 
+const requiredReadmeTargets = [
+  "ARCHITECTURE.md",
+  "PROVENANCE.md",
+  "docs/data-boundary.md",
+  "SECURITY.md",
+  "LICENSE",
+  "CONTRIBUTING.md",
+  "docs/extension-guide.md",
+];
+
 for (const file of requiredFiles) {
   await readFile(file, "utf8");
+}
+
+const readme = await readFile("README.md", "utf8");
+for (const target of requiredReadmeTargets) {
+  if (!readme.includes("](" + target + ")")) {
+    throw new Error("README is missing required link target: " + target);
+  }
 }
 
 const workflow = await readFile(".github/workflows/ci.yml", "utf8");

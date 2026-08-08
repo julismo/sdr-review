@@ -87,7 +87,16 @@ textarea {
 
 .queue-item[aria-current="true"] {
   border-color: #155eef;
-  outline: 3px solid #dbeafe;
+  box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.queue-item-status {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.queue-item-scope {
+  color: #52606d;
 }
 
 .policy-results li,
@@ -118,7 +127,7 @@ button:disabled {
 }
 
 button:focus-visible {
-  outline: 3px solid #f59e0b;
+  outline: 3px solid #000000;
   outline-offset: 2px;
 }
 
