@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import App from "./App";
 
 describe("App", () => {
@@ -8,5 +9,26 @@ describe("App", () => {
     expect(
       screen.getByRole("heading", { name: "Reviewable Intake Workbench" }),
     ).toBeInTheDocument();
+  });
+
+  it("shows the selected request explanation and human review actions", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(
+      screen.getByRole("button", { name: /Aurora Fieldworks/i }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Aurora Fieldworks" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Policy results" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Request context" }),
+    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Reject" })).toBeEnabled();
   });
 });
