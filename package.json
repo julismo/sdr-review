@@ -17,7 +17,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "scan:public-safety": "node scripts/scan-public-safety.mjs",
+    "verify:release-docs": "node scripts/verify-release-docs.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
