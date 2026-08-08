@@ -12,6 +12,8 @@ A local-only reference implementation for deterministic intake recommendations a
 
 ## Quick start
 
+Node.js 24 or newer is required.
+
 ```text
 npm install
 npm run dev

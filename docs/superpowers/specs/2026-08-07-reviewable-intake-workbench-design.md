@@ -1,6 +1,6 @@
 # Reviewable Intake Workbench Design
 
-**Status:** Approved design, awaiting written-spec review  
+**Status:** Implemented and locally verified; public publication awaits final release checks
 **Repository language:** English  
 **License:** MIT
 
@@ -28,19 +28,21 @@ The repository is a clean-room project with a new Git history. It must contain n
 ## Repository Shape
 
 ```text
+ARCHITECTURE.md          System boundaries and data flow
 apps/
-  demo/                 React application used to explore the workflow
+  demo/                 React application, UI state, and browser-local persistence
 packages/
-  core/                 Framework-independent domain and policy package
+  core/                 Framework-independent validation, policy, workflow, and audit behavior
   fixtures/             Explicitly synthetic scenarios used by the demo and tests
 docs/
-  architecture.md       System boundaries and data flow
   extension-guide.md    How to add a policy or persistence adapter
   data-boundary.md      Synthetic-data and privacy guarantees
   superpowers/specs/    Approved design and implementation plans
 ```
 
 The repository uses npm workspaces, TypeScript, React, Vite, Vitest, Testing Library, Playwright, ESLint, and GitHub Actions. Node.js 24 is the supported local and CI runtime.
+
+`packages/core` remains independent of browser APIs and persistence. `apps/demo` owns the browser-facing `StorageLike` boundary, the `localStorage` adapter, and the logic for loading, saving, clearing, and restoring demo snapshots. The `docs/` directory contains the data boundary, extension guide, and project planning records.
 
 ## Domain Model
 
@@ -51,9 +53,8 @@ The repository uses npm workspaces, TypeScript, React, Vite, Vitest, Testing Lib
 - `Evaluation`: the ordered policy results plus the derived recommendation.
 - `ReviewStatus`: `new`, `evaluated`, `needs_review`, `approved`, `context_requested`, or `rejected`.
 - `AuditEvent`: an immutable event with an event identifier, timestamp, actor type, event type, and payload summary.
-- `PersistenceAdapter`: a small boundary for loading, saving, and clearing a demo snapshot. The initial application implements it with browser `localStorage` only.
 
-The core exposes functions equivalent to `validateRequest`, `evaluateRequest`, `transitionReview`, and `appendAuditEvent`. Each function accepts plain data and returns typed results; it does not import React, browser APIs, environment variables, or network clients.
+The core publicly exports `validateRequest`, `evaluateRequest`, `createWorkflow`, `evaluateWorkflow`, and `transitionReview`. It appends immutable audit events internally as workflows are created, evaluated, and transitioned; there is no standalone public `appendAuditEvent` API. These functions accept plain data and return typed results; the core does not import React, browser APIs, environment variables, or network clients.
 
 ## Workflow
 
