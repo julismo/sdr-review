@@ -50,26 +50,8 @@ function selectedRecordFor(snapshot: DemoSnapshot): WorkflowRecord | null {
 function initialState(storage: StorageLike | null): InitialState {
   const persisted = storage ? loadSnapshot(storage) : null;
 
-  if (persisted && persisted.records.length === 6) {
-    if (selectedRecordFor(persisted)) {
-      return { snapshot: persisted, persistenceMessage: null };
-    }
-
-    const snapshot = {
-      ...persisted,
-      selectedId: persisted.records[0].request.id,
-    };
-
-    if (!storage) {
-      return { snapshot, persistenceMessage: null };
-    }
-
-    const result = saveSnapshot(storage, snapshot);
-
-    return {
-      snapshot,
-      persistenceMessage: result.ok ? null : result.error,
-    };
+  if (persisted) {
+    return { snapshot: persisted, persistenceMessage: null };
   }
 
   return { snapshot: freshSnapshot(), persistenceMessage: null };
@@ -139,14 +121,17 @@ export function useDemoWorkflow() {
   }
 
   function reset(): void {
-    if (storage) {
-      clearSnapshot(storage);
-    }
-
     const nextSnapshot = freshSnapshot();
     snapshotRef.current = nextSnapshot;
     setSnapshot(nextSnapshot);
-    setPersistenceMessage(null);
+
+    if (!storage) {
+      setPersistenceMessage(null);
+      return;
+    }
+
+    const result = clearSnapshot(storage);
+    setPersistenceMessage(result.ok ? null : result.error);
   }
 
   return {

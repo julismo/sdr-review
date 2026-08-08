@@ -27,7 +27,7 @@ describe("useDemoWorkflow", () => {
     expect(result.current.records[0].status).not.toBe("approved");
   });
 
-  it("repairs an invalid persisted selected ID before retaining the snapshot", () => {
+  it("rejects a persisted snapshot whose selected ID is invalid", () => {
     window.localStorage.setItem(
       snapshotKey,
       JSON.stringify({
@@ -40,8 +40,59 @@ describe("useDemoWorkflow", () => {
 
     expect(result.current.selectedRecord?.request.id).toBe("req-aurora");
     expect(window.localStorage.getItem(snapshotKey)).toContain(
-      '"selectedId":"req-aurora"',
+      '"selectedId":"missing-request"',
     );
+  });
+
+  it("shows a failed-clear warning while resetting memory and may restore the old snapshot on reload", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(window, "localStorage");
+    let storedSnapshot: string | null = null;
+    const refusingStorage = {
+      getItem: (key: string) => (key === snapshotKey ? storedSnapshot : null),
+      setItem: (key: string, value: string) => {
+        if (key === snapshotKey) {
+          storedSnapshot = value;
+        }
+      },
+      removeItem: () => {
+        throw new DOMException("Storage removal denied", "SecurityError");
+      },
+    };
+
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      value: refusingStorage,
+    });
+
+    try {
+      const firstMount = renderHook(() => useDemoWorkflow());
+
+      act(() => {
+        firstMount.result.current.review("approve");
+      });
+
+      expect(firstMount.result.current.selectedRecord?.status).toBe("approved");
+
+      act(() => {
+        firstMount.result.current.reset();
+      });
+
+      expect(firstMount.result.current.records).toEqual(createDemoRecords());
+      expect(firstMount.result.current.persistenceMessage).toBe(
+        "Local snapshot could not be cleared. Fresh fixtures are active for this session, but reloading may restore the previous saved state.",
+      );
+      firstMount.unmount();
+
+      const reloadedMount = renderHook(() => useDemoWorkflow());
+
+      expect(reloadedMount.result.current.selectedRecord?.status).toBe(
+        "approved",
+      );
+    } finally {
+      if (descriptor) {
+        Object.defineProperty(window, "localStorage", descriptor);
+      }
+    }
   });
 
   it("remains usable when accessing browser storage throws", () => {
