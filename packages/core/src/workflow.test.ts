@@ -50,4 +50,42 @@ describe("workflow", () => {
       value: created,
     });
   });
+
+  it("returns an evaluated workflow unchanged when evaluation is repeated", () => {
+    const created = createWorkflow(request, "2026-08-07T09:00:00.000Z");
+    const evaluated = evaluateWorkflow(created, "2026-08-07T09:01:00.000Z");
+    const repeated = evaluateWorkflow(evaluated, "2026-08-07T09:02:00.000Z");
+
+    expect(repeated).toBe(evaluated);
+    expect(repeated.events).toHaveLength(evaluated.events.length);
+    expect(new Set(repeated.events.map((event) => event.id)).size).toBe(
+      repeated.events.length,
+    );
+  });
+
+  it("returns an approved workflow unchanged when evaluation is attempted again", () => {
+    const created = createWorkflow(request, "2026-08-07T09:00:00.000Z");
+    const evaluated = evaluateWorkflow(created, "2026-08-07T09:01:00.000Z");
+    const approved = transitionReview(
+      evaluated,
+      "approve",
+      "2026-08-07T09:02:00.000Z",
+    );
+
+    expect(approved.ok).toBe(true);
+    if (!approved.ok) {
+      throw new Error("Expected approval to succeed.");
+    }
+
+    const repeated = evaluateWorkflow(
+      approved.value,
+      "2026-08-07T09:03:00.000Z",
+    );
+
+    expect(repeated).toBe(approved.value);
+    expect(repeated.events).toHaveLength(approved.value.events.length);
+    expect(new Set(repeated.events.map((event) => event.id)).size).toBe(
+      repeated.events.length,
+    );
+  });
 });

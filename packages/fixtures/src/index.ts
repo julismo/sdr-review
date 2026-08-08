@@ -1,6 +1,7 @@
 import {
   createWorkflow,
   evaluateWorkflow,
+  validateRequest,
   type IntakeRequest,
   type WorkflowRecord,
 } from "@reviewable-intake/core";
@@ -66,8 +67,21 @@ export function createDemoRecords(): readonly WorkflowRecord[] {
     requests.map((request, index) => {
       const createdAt = "2026-08-07T09:0" + index + ":00.000Z";
       const evaluatedAt = "2026-08-07T09:1" + index + ":00.000Z";
+      const validation = validateRequest(request);
 
-      return evaluateWorkflow(createWorkflow(request, createdAt), evaluatedAt);
+      if (!validation.ok) {
+        const details = validation.errors
+          .map(({ field, message }) => field + ": " + message)
+          .join(" ");
+        throw new Error(
+          "Fixture request " + (index + 1) + " is invalid: " + details,
+        );
+      }
+
+      return evaluateWorkflow(
+        createWorkflow(validation.value, createdAt),
+        evaluatedAt,
+      );
     }),
   );
 }

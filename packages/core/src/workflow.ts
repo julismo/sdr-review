@@ -66,6 +66,10 @@ export function evaluateWorkflow(
   workflow: WorkflowRecord,
   occurredAt: string,
 ): WorkflowRecord {
+  if (workflow.status !== "new") {
+    return workflow;
+  }
+
   const evaluation = evaluateRequest(workflow.request);
   const status = evaluationStatus(workflow.status, evaluation.recommendation);
 

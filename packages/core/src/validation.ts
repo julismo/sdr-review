@@ -1,13 +1,10 @@
 import {
   dataSensitivities,
   intakeIntents,
-  type IntakeRequest,
   type RequestField,
   type ValidationError,
   type ValidationResult,
 } from "./types";
-
-type CandidateRequest = Partial<IntakeRequest>;
 
 function hasValue<T extends readonly string[]>(
   values: T,
@@ -16,24 +13,40 @@ function hasValue<T extends readonly string[]>(
   return typeof candidate === "string" && values.includes(candidate);
 }
 
+function isRecord(
+  candidate: unknown,
+): candidate is Readonly<Record<string, unknown>> {
+  return (
+    typeof candidate === "object" && candidate !== null && !Array.isArray(candidate)
+  );
+}
+
+function normalizedText(candidate: unknown): string {
+  return typeof candidate === "string" ? candidate.trim() : "";
+}
+
 function error(field: RequestField, message: string): ValidationError {
   return { field, message };
 }
 
-export function validateRequest(candidate: CandidateRequest): ValidationResult {
+export function validateRequest(candidate: unknown): ValidationResult {
   const errors: ValidationError[] = [];
-  const id = candidate.id?.trim() ?? "";
-  const company = candidate.company?.trim() ?? "";
-  const scope = candidate.scope?.trim() ?? "";
-  const context = candidate.context?.trim();
-  const intent = hasValue(intakeIntents, candidate.intent)
-    ? candidate.intent
+  const fields: Readonly<Record<string, unknown>> = isRecord(candidate)
+    ? candidate
+    : {};
+  const id = normalizedText(fields.id);
+  const company = normalizedText(fields.company);
+  const scope = normalizedText(fields.scope);
+  const context =
+    typeof fields.context === "string" ? fields.context.trim() : undefined;
+  const intent = hasValue(intakeIntents, fields.intent)
+    ? fields.intent
     : null;
   const dataSensitivity = hasValue(
     dataSensitivities,
-    candidate.dataSensitivity,
+    fields.dataSensitivity,
   )
-    ? candidate.dataSensitivity
+    ? fields.dataSensitivity
     : null;
 
   if (id.length < 3) {
@@ -56,7 +69,7 @@ export function validateRequest(candidate: CandidateRequest): ValidationResult {
     );
   }
 
-  if (candidate.consent !== true) {
+  if (fields.consent !== true) {
     errors.push(
       error("consent", "Consent is required before a request can be evaluated."),
     );
@@ -72,6 +85,8 @@ export function validateRequest(candidate: CandidateRequest): ValidationResult {
     errors.push(
       error("context", "Context must contain no more than 280 characters."),
     );
+  } else if (fields.context !== undefined && context === undefined) {
+    errors.push(error("context", "Context must be text when provided."));
   }
 
   if (errors.length > 0 || !intent || !dataSensitivity) {
