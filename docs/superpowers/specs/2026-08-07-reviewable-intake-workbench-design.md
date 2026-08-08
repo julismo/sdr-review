@@ -37,7 +37,8 @@ packages/
 docs/
   extension-guide.md    How to add a policy or persistence adapter
   data-boundary.md      Synthetic-data and privacy guarantees
-  superpowers/specs/    Approved design and implementation plans
+  superpowers/specs/    Approved design
+  superpowers/plans/    Implementation plan
 ```
 
 The repository uses npm workspaces, TypeScript, React, Vite, Vitest, Testing Library, Playwright, ESLint, and GitHub Actions. Node.js 24 is the supported local and CI runtime.
