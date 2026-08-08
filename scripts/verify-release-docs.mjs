@@ -17,6 +17,7 @@ const requiredWorkflowTokens = [
   "npm run lint",
   "npm run typecheck",
   "npm run test",
+  "npm run test:scanner",
   "npm run build",
   "npm run test:e2e",
   "npm run verify:release-docs",

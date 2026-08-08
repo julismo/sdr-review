@@ -16,6 +16,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:scanner": "node --test scripts/scan-public-safety.node-test.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "scan:public-safety": "node scripts/scan-public-safety.mjs",

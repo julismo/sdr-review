@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test public safety scanner
+        run: npm run test:scanner
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 

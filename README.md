@@ -25,6 +25,7 @@ Open the loopback URL printed by Vite. The demo contains six fictional records a
 npm run lint
 npm run typecheck
 npm run test
+npm run test:scanner
 npm run build
 npm run test:e2e
 npm run scan:public-safety

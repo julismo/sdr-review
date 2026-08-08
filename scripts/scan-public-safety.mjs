@@ -156,7 +156,11 @@ function scan(file, text) {
 }
 
 function safePath(file) {
-  return file.replace(/[\r\n]/g, "?");
+  return JSON.stringify(file).replace(
+    /[\u007f-\u009f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]/g,
+    (character) =>
+      `\\u${character.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0")}`,
+  );
 }
 
 try {
