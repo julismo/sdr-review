@@ -18,7 +18,7 @@ export default function App() {
   if (!selectedRecord) {
     return (
       <main className="app-shell">
-        <h1>Reviewable Intake Workbench</h1>
+        <h1>SDR Review</h1>
         <p>No synthetic requests are available.</p>
       </main>
     );
@@ -29,7 +29,7 @@ export default function App() {
       <header className="app-header">
         <div>
           <p className="eyebrow">Local-only reference implementation</p>
-          <h1>Reviewable Intake Workbench</h1>
+          <h1>SDR Review</h1>
           <p>
             All records are fictional. Recommendations are deterministic and
             require human review.

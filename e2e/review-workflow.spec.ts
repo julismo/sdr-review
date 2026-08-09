@@ -11,8 +11,9 @@ test("reviews a synthetic request and resets the local demo", async ({ page }) =
 
   await page.goto("/");
 
+  await expect(page).toHaveTitle("SDR Review");
   await expect(
-    page.getByRole("heading", { name: "Reviewable Intake Workbench" }),
+    page.getByRole("heading", { name: "SDR Review" }),
   ).toBeVisible();
 
   await page.getByRole("button", { name: /Aurora Fieldworks/i }).click();

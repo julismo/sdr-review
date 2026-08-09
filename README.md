@@ -1,6 +1,6 @@
-# Reviewable Intake Workbench
+# SDR Review
 
-A local-only reference implementation for deterministic intake recommendations and human review.
+A local-only reference for deterministic SDR review and human decisions.
 
 ## What it demonstrates
 
